@@ -1,0 +1,45 @@
+[project]
+name = "web"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "mkass420",email = "xazgaz50@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "flask (>=3.1.1,<4.0.0)",
+    "flask-sqlalchemy (>=3.1.1,<4.0.0)",
+    "flask-login (>=0.6.3,<0.7.0)",
+    "flask-wtf (>=1.2.2,<2.0.0)",
+    "python-dotenv (>=1.1.0,<2.0.0)",
+    "sqlalchemy (>=2.0.41,<3.0.0)",
+    "werkzeug (>=3.1.3,<4.0.0)"
+]
+
+[tool.poetry]
+name = "web"
+version = "0.1.0"
+description = "Beer tracking web application"
+authors = [
+    "mkass420 <xazgaz50@gmail.com>"
+]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = ">=3.13"
+flask = "^3.0.2"
+flask-sqlalchemy = "^3.1.1"
+flask-login = "^0.6.3"
+flask-wtf = "^1.2.1"
+python-dotenv = "^1.0.1"
+sqlalchemy = "^2.0.28"
+werkzeug = "^3.0.1"
+
+[tool.poetry.scripts]
+start = "flask:run"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

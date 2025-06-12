@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ПИВО</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            color: #333;
+            padding: 20px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            padding-top: 100px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.9);
+        }
+
+        .modal-content {
+            margin: auto;
+            display: block;
+            width: 80%;
+            max-width: 700px;
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .clickable-image {
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .clickable-image:hover {opacity: 0.7;}
+
+        #lastVisit {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        header {
+            background: #333;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .tabs {
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .tabs input[type="radio"] {
+            display: none;
+        }
+
+        .tab-labels {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            background: #f9f9f9;
+        }
+
+        .tab-labels label {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            border-right: 1px solid #ddd;
+        }
+
+        .tab-labels label:last-child {
+            border-right: none;
+        }
+
+        .tabs input[type="radio"]:checked+label {
+            background: #007BFF;
+            color: #fff;
+        }
+
+        .tab-content>section {
+            display: none;
+            padding: 20px;
+        }
+
+        #tab-history:checked~.tab-content #history,
+        #tab-lager:checked~.tab-content #lager,
+        #tab-ale:checked~.tab-content #ale,
+        #tab-stout:checked~.tab-content #stout,
+        #tab-about:checked~.tab-content #about {
+            display: block;
+        }
+
+        #tab-tracker:checked~.tab-content #tracker {
+            display: block;
+        }
+
+        .tab-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab-text {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .tab-image {
+            flex: 1;
+            min-width: 250px;
+            text-align: center;
+        }
+
+        .tab-image img {
+            width: 100%;
+            max-width: 800px;
+            border-radius: 5px;
+        }
+
+        figcaption {
+            font-size: 0.9em;
+            color: #555;
+            margin-top: 5px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #777;
+        }
+
+        .reverse {
+            flex-direction: row-reverse;
+        }
+
+        /* Стили для трекера пива */
+        #beer-tracker {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .tracker-user {
+            margin-bottom: 20px;
+        }
+
+        .tracker-user input[type="text"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .tracker-user button {
+            padding: 10px 20px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        .tracker-user button:hover {
+            background: #0056b3;
+        }
+
+        .tracker-user span {
+            margin-left: 10px;
+            font-size: 16px;
+        }
+
+        .tracker-stats {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .tracker-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tracker-form input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .tracker-form button {
+            padding: 10px 20px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        .tracker-form button:hover {
+            background: #0056b3;
+        }
+
+        .tracker-history {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .tracker-history ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .tracker-history li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .tracker-history li:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="imageModal" class="modal">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+    <div id="lastVisit"></div>
+
+    <header>
+        <h1>ПИВО</h1>
+        <p>Обзор основных сортов пива, история пивоварения</p>
+    </header>
+
+    <div class="tabs">
+        <input type="radio" name="tabs" id="tab-tracker" checked>
+        <input type="radio" name="tabs" id="tab-history">
+        <input type="radio" name="tabs" id="tab-lager">
+        <input type="radio" name="tabs" id="tab-ale">
+        <input type="radio" name="tabs" id="tab-stout">
+        <input type="radio" name="tabs" id="tab-about">
+
+        <div class="tab-labels">
+            <label for="tab-tracker">Трекер пива</label>
+            <label for="tab-history">История</label>
+            <label for="tab-lager">Лагер</label>
+            <label for="tab-ale">Эль</label>
+            <label for="tab-stout">Стаут</label>
+            <label for="tab-about">О сайте</label>
+        </div>
+
+        <div class="tab-content">
+            <section id="tracker">
+                <div id="beer-tracker">
+                    <div class="tracker-user">
+                        <input type="text" id="username" placeholder="Ваше имя" maxlength="128">
+                        <button onclick="saveUsername()">Сохранить имя</button>
+                        <span id="username-display"></span>
+                    </div>
+                    <div class="tracker-stats">
+                        <h2>Статистика за сегодня</h2>
+                        <p>Всего выпито: <span id="today-total">0</span> л.</p>
+                    </div>
+                    <div class="tracker-form">
+                        <input type="number" id="beer-amount" placeholder="Количество литров" step="0.1" min="0">
+                        <button onclick="addBeer()">Добавить</button>
+                    </div>
+                    <div class="tracker-history">
+                        <h3>История за сегодня</h3>
+                        <ul id="beer-history"></ul>
+                    </div>
+                    <div class="tracker-rating">
+                        <h3>Глобальный рейтинг (сегодня)</h3>
+                        <ol id="rating-today"></ol>
+                        <h3>Глобальный рейтинг (всё время)</h3>
+                        <ol id="rating-total"></ol>
+                    </div>
+                </div>
+            </section>
+
+            <section id="history">
+                <div class="tab-item">
+                    <div class="tab-text">
+                        <h2>История пивоварения: от древности до современности</h2>
+                        
+                        <h3>Древние цивилизации</h3>
+                        <p>Пиво — один из старейших напитков человечества. Первые свидетельства его производства относятся к Месопотамии (около
+                            6 тыс. лет до н.э.), где шумеры варили ячменный напиток с использованием диких дрожжей. В Египте пиво стало частью
+                            религиозных ритуалов и повседневного рациона: его давали даже строителям пирамид. Рецепты включали финики и полбу, а
+                            процеживали напиток через тростниковые сита.</p>
+                        
+                        <h3>Античность и Средневековье</h3>
+                        <p>В Древней Греции и Риме пиво считалось «варварским» напитком, уступая вину. Однако кельты и германские племена
+                            совершенствовали рецепты, добавляя мёд и травы. В Средние века европейские монастыри стали центрами пивоварения:
+                            монахи разрабатывали новые технологии, такие как использование хмеля (XI век), что улучшило сохранность и вкус
+                            напитка.</p>
+                        
+                        <h3>Мировая история пивоварения после Средневековья</h3>
+                        
+                        <h4>Эпоха Возрождения и Реформации (XVI–XVII вв.)</h4>
+                        <ul>
+                            <li>В 1516 году в Баварии принят «Закон о чистоте пива» (Reinheitsgebot), разрешавший использовать только воду,
+                                ячмень и хмель. Это повысило качество напитка и стало основой немецкой пивоваренной традиции.</li>
+                            <li>В Англии начали варить портер — тёмное пиво для рабочих доков, которое хранилось дольше благодаря высокой
+                                крепости и добавлению жжёного солода.</li>
+                        </ul>
+
+                        <h4>Промышленная революция (XVIII–XIX вв.)</h4>
+                        <ul>
+                            <li>Изобретение парового двигателя (Джеймс Уатт) и механизации процессов позволило массово производить пиво.
+                                Появились крупные заводы: Guinness (Ирландия, 1759), Pilsner Urquell (Чехия, 1842).</li>
+                            <li>Луи Пастер открыл пастеризацию (1864), что увеличило срок хранения пива. Эмиль Хансен выделил чистые дрожжевые
+                                культуры, стандартизировав брожение.</li>
+                            <li>В США немецкие иммигранты основали бренды Anheuser-Busch (Budweiser) и Miller, популяризировав лагеры в Новом
+                                Свете.</li>
+                        </ul>
+                        
+                        <h4>Колониальная экспансия и глобализация</h4>
+                        <ul>
+                            <li>Британские колонисты привезли эли в Индию и Австралию, что привело к созданию IPA (India Pale Ale).</li>
+                            <li>В Африке и Азии местные сорта (например, сорговое пиво) смешивались с европейскими рецептами.</li>
+                        </ul>
+                        
+                        <h4>XX век: Войны и инновации</h4>
+                        <ul>
+                            <li>В период мировых войн производство пива сократилось из-за нехватки сырья. Однако после 1945 года рынок
+                                восстановился: в Европе доминировали лагеры, в США — лайт-версии.</li>
+                            <li>В 1970-х началась крафт-революция: пивоварни Sierra Nevada (США) и CAMRA (Великобритания) возродили интерес к
+                                традиционным стилям.</li>
+                        </ul>
+                        
+                        <h3>Пивоварение на Руси</h3>
+                        <ul>
+                            <li>
+                                <h4>Древняя Русь (IX–XIII вв.)</h4>
+                                <p>На Руси пиво варили из ячменя, ржи и овса. Хмель начали добавлять раньше, чем в Европе — упоминания о
+                                    «хмельном мёде» встречаются в летописях с IX века. Пиво было обязательным на праздниках (свадьбы, тризны), а
+                                    его производство контролировали княжеские указы.</p>
+                            </li>
+                            <li>
+                                <h4>Московское царство (XIV–XVII вв.)</h4>
+                                <p>При Иване Грозном пивоварение стало государственной монополией. Появились «царёвы кабаки», где подавали пиво
+                                    и мёд. В XVII веке начали варить «боярское пиво» с повышенной крепостью, а иностранные мастера привозили
+                                    рецепты европейских элей.</p>
+                            </li>
+                        </ul>
+                        
+                        <h3>Пивоварение в Российской империи</h3>
+                        <ul>
+                            <li>
+                                <h4>Эпоха Петра I</h4>
+                                <p>Пётр I, впечатлённый европейскими традициями, открыл первые публичные пивоварни в Санкт-Петербурге. Немецкие
+                                    мастера обучали русских пивоваров, а в меню дворян вошли английские портеры и немецкие лагеры.</p>
+                            </li>
+                            <li>
+                                <h4>XIX век: Промышленная революция</h4>
+                                <p>С развитием технологий появились крупные заводы:
+                                <ul>
+                                    <li>Калинкинский пивзавод (Санкт-Петербург, 1795),</li>
+                                    <li>Трехгорный завод (Москва, 1875).</li>
+                                </ul>
+                                К 1890-м годам в России работало более 1,5 тыс. пивоварен, а популярность приобрели «Венское» и «Мюнхенское»
+                                пиво.</p>
+                            </li>
+                        </ul>
+                        
+                        <h3>Советский период</h3>
+                        <p>После революции 1917 года частные пивоварни национализировали. Акцент делался на массовое производство:
+                        <ul>
+                            <li>«Жигулёвское» (варьировало рецепт венского лагера),</li>
+                            <li>«Советское тёмное».</li>
+                        </ul>
+                        К 1980-м годам ассортимент сократился до 10–15 сортов, а качество снизилось из-за экономии на ингредиентах.</p>
+                        
+                        <h3>Современная Россия</h3>
+                        <ul>
+                            <li>
+                                <h4>1990–2000-е: Возрождение рынка</h4>
+                                <p>С распадом СССР в Россию пришли международные бренды (Heineken, Carlsberg), но местные заводы (Балтика,
+                                    Тинькофф) сохранили лидерство. Появились первые крафтовые эксперименты, такие как «Василеостровская
+                                    пивоварня» (Санкт-Петербург).</p>
+                            </li>
+                            <li>
+                                <h4>2010-е: Крафт-революция</h4>
+                                <p>Микропивоварни вроде «AF Brew» (Москва) и «Bakunin» (Санкт-Петербург) начали варить IPA, стауты и сэшены,
+                                    используя локальные ингредиенты (облепиха, морошка). В 2023 году в России работало более 800 крафтовых
+                                    пивоварен.</p>
+                            </li>
+                        </ul>
+                        
+                        <h2>Вклад России в мировое пивоварение</h2>
+                        <ul>
+                            <li>Русский хмель: Сорта из Чувашии и Алтая ценятся за аромат и используются европейскими пивоварами.</li>
+                            <li>Традиционные напитки: Квас, хотя и не является пивом, повлиял на развитие ферментированных напитков в регионе.
+                            </li>
+                            <li>Эксперименты: Российские крафтовые пивоварни получили награды на международных конкурсах (World Beer Cup).</li>
+                        </ul>
+                        
+                        <h2>Заключение</h2>
+                        <p>История пивоварения — это зеркало технологического и культурного прогресса. От глиняных сосудов Шумера до цифровых
+                            котлов современных пивоварен, напиток объединял эпохи и народы. Россия, пройдя путь от хмельных мёдов до крафтовых
+                            IPA, доказала, что даже в условиях климатических и политических вызовов можно создавать пиво, достойное мировой
+                            сцены.</p>
+                    </div>
+                    <div class="tab-image">
+                        <figure>
+                            <img src="/images/beer_history_1.jpg" class="clickable-image" alt="Историческое пивоварение">
+                        </figure>
+                    </div>
+                </div>
+            </section>
+
+            <section id="lager">
+                <div class="tab-item reverse">
+                    <div class="tab-text">
+                        <h2>История лагеров</h2>
+                        
+                        <h3>Истоки в Центральной Европе</h3>
+                        <p>Лагеры появились в позднем Средневековье в Германии и Чехии, где пивовары экспериментировали с холодным брожением.
+                            Использование низовых дрожжей (Saccharomyces pastorianus) и хранение пива в пещерах или подвалах («лагер» от нем.
+                            «lagern» — хранить) позволило создать чистый, стабильный вкус. Первые лагеры были тёмными и мутными, пока в XIX веке
+                            технология не совершила прорыв.</p>
+                        
+                        <h3>Революция светлого лагера</h3>
+                        <p>В 1842 году в чешском Пльзене был сварен первый Pilsner — золотистый лагер с хрустальной прозрачностью, ставший
+                            эталоном стиля. Изобретение холодильных установок и пастеризации в конце XIX века сделало лагеры доминирующим пивом
+                            в мире, особенно после экспансии таких брендов, как Budweiser и Heineken.</p>
+                        
+                        <h3>Лагеры в современную эпоху</h3>
+                        <p>В XX веке массовое производство удешевило лагеры, но снизило их разнообразие. Ситуация изменилась с 2010-х годов,
+                            когда крафтовые пивоварни начали возрождать забытые стили и экспериментировать с ингредиентами.</p>
+                        
+                        <h2>Разновидности лагеров</h2>
+                        
+                        <h3>Светлый лагер (Pale Lager)</h3>
+                        <ul>
+                            <li>Характеристики: Светло-соломенный цвет, лёгкая хмелевая горчинка, чистый солодовый профиль.</li>
+                            <li>Примеры: Pilsner Urquell (Чехия), Sierra Nevada Pale Lager (США), Helles (Германия).</li>
+                        </ul>
+
+                        <h3>Тёмный лагер (Dunkel)</h3>
+                        <ul>
+                            <li>Особенности: Тёмно-коричневый цвет, карамельные и хлебные ноты, мягкая горечь.</li>
+                            <li>Примеры: Köstritzer Schwarzbier (Германия), Negra Modelo (Мексика).</li>
+                        </ul>
+                        
+                        <h3>Бок (Bock)</h3>
+                        <ul>
+                            <li>Типы:
+                                <ul>
+                                    <li>Maibock — весенний, с медовыми оттенками.</li>
+                                    <li>Doppelbock — крепкий (7–12% алкоголя), с тонами ирисок и сухофруктов.</li>
+                                </ul>
+                            </li>
+                            <li>Примеры: Paulaner Salvator (Германия), Ayinger Celebrator.</li>
+                        </ul>
+                        
+                        <h3>Венский лагер (Vienna Lager)</h3>
+                        <ul>
+                            <li>Вкус: Медово-карамельный, с балансом солода и хмеля.</li>
+                            <li>Примеры: Dos Equis Ambar (Мексика), Samuel Adams Boston Lager.</li>
+                        </ul>
+                        
+                        <h2>Лагер vs. Эль: Ключевые отличия</h2>
+                        <ul>
+                            <li>Дрожжи: Низовые (лагер) vs. верховые (эль).</li>
+                            <li>Температура брожения: 4–13°C (лагер) vs. 15–24°C (эль).</li>
+                            <li>Вкус: Лагеры — чистые, сбалансированные; эли — фруктовые, сложные.</li>
+                            <li>Срок созревания: Лагеры требуют месяцев холодного хранения, эли готовы за недели.</li>
+                        </ul>
+                        
+                        <h2>Современные тренды</h2>
+                        <p>Крафтовые пивоварни переосмысливают классические стили:</p>
+                        <ul>
+                            <li>India Pale Lager (IPL) — гибрид IPA и лагера с яркой хмелевой ароматикой.</li>
+                            <li>Копчёные лагеры — с использованием дровяного солода.</li>
+                            <li>Сухие лагеры (Dry-Hopped) — с добавлением ароматических хмелей после брожения.</li>
+                        </ul>
+                        
+                        <h2>Заключение</h2>
+                        <p>Лагеры — это не только массовое пиво, но и многовековая традиция, сочетающая технологичность и терпение. От
+                            средневековых монастырей до современных микропивоварен, они эволюционировали, сохраняя свою суть: кристальную
+                            прозрачность, освежающий вкус и универсальность. Сегодня лагеры доказывают, что простота может быть изысканной, а
+                            классика — актуальной в любую эпоху.</p>
+                    </div>
+                    <div class="tab-image">
+                        <figure>
+                            <img src="/images/lager.jpg" class="clickable-image" alt="Лагер">
+                        </figure>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ale">
+                <div class="tab-item">
+                    <div class="tab-text">
+                        <h2>История эля</h2>
+    
+                        <h3>Древние истоки</h3>
+                        <p>Первые упоминания о напитках, похожих на эль, относятся к эпохе Месопотамии (около 5 тыс. лет до н.э.). Вавилоняне и шумеры варили пиво из ячменя, используя дикие дрожжи. В Средневековой Европе эль стал основным напитком: его пили вместо воды, которая часто была непригодна для употребления.</p>
+    
+                        <h3>Грюйт vs. Хмель</h3>
+                        <p>Изначально для придания горькости и консервации использовали смесь трав — грюйт (розмарин, мирт, имбирь). Хмель начали добавлять лишь в XI веке, а к XV веку он почти полностью вытеснил грюйт. Это разделило пивоварение на «эль» (с хмелем) и «пиво» (без него), но позже термины смешались.</p>
+    
+                        <h3>Индустриальная революция и новые технологии</h3>
+                        <p>В XVIII–XIX вв. изобретение парового двигателя и охлаждающих систем упростили производство. Однако эль уступил часть рынка лагерам, которые дольше хранились. Возрождение интереса к элю началось в 1970-х с движения Real Ale Campaign в Великобритании, а затем и крафтовой революции в США.</p>
+    
+                        <h2>Разновидности эля</h2>
+    
+                        <h3>Бледный эль</h3>
+                        <ul>
+                            <li>Особенности: Золотистый цвет, умеренная горчинка, фруктовые нотки.</li>
+                            <li>Примеры: English Pale Ale (сбалансированный вкус), American Pale Ale (яркий хмелевой аромат).</li>
+                        </ul>
+    
+                        <h3>Индийский бледный эль (IPA)</h3>
+                        <ul>
+                            <li>История: Создан в XIX веке для британских колонистов в Индии. Высокое содержание хмеля и алкоголя продлевало срок хранения.</li>
+                            <li>Стили: West Coast IPA (резкая горечь), New England IPA (мутный, с цитрусовыми нотками).</li>
+                        </ul>
+    
+                        <h3>Портер и стаут</h3>
+                        <ul>
+                            <li>Портер: Тёмный, с нотами карамели и шоколада. Популярен в Лондоне XVIII века.</li>
+                            <li>Стаут: Более крепкий и густой вариант портера. Знаменитый Guinness — классический пример.</li>
+                        </ul>
+    
+                        <h3>Коричневый эль</h3>
+                        <ul>
+                            <li>Вкус: Ореховый, карамельный, с лёгкой горчинкой. Распространён в Северной Англии.</li>
+                        </ul>
+    
+                        <h3>Бельгийские эли</h3>
+                        <ul>
+                            <li>Особенности: Фруктово-пряные ароматы благодаря уникальным дрожжам. Примеры: Saison, Dubbel, Tripel.</li>
+                        </ul>
+    
+                        <h3>Специальные стили</h3>
+                        <ul>
+                            <li>Barley Wine: Крепкий эль (8–12% алкоголя) с богатым вкусом.</li>
+                            <li>Sour Ale: Кислый вкус, полученный за счёт диких дрожжей и бактерий.</li>
+                        </ul>
+    
+                        <h2>Эль vs. Лагер: В чём разница?</h2>
+                        <ul>
+                            <li>Дрожжи: Эль бродит при помощи верховых дрожжей (15–24°C), лагер — низовых (4–13°C).</li>
+                            <li>Вкус: Эли чаще фруктовые и сложные, лагеры — чистые и свежие.</li>
+                            <li>Время брожения: Эль готовится быстрее (недели), лагер требует месяцев холодного хранения.</li>
+                        </ul>
+    
+                        <h2>Современные тренды</h2>
+                        <p>Крафтовые пивоварни экспериментируют с гибридными стилями, добавляя кофе, мёд, экзотические фрукты и даже перец. Популярность набирают:</p>
+                        <ul>
+                            <li>Hazy IPA (мутный, с соковой текстурой),</li>
+                            <li>Pastry Stout (сладкий, с десертными оттенками),</li>
+                            <li>Session Ale (лёгкий и низкокалорийный).</li>
+                        </ul>
+                        
+                        <h2>Заключение</h2>
+                        <p>Эль — напиток, соединивший традиции и инновации. От древних месопотамских пивоварен до современных крафтовых баров, он продолжает удивлять разнообразием. Каждый стиль рассказывает свою историю, будь то выдержанный в бочках имперский стаут или освежающий летний эль с ягодами. Погружение в мир элей — это путешествие сквозь века и культуры.</p>
+                    </div>
+                    <div class="tab-image">
+                        <figure>
+                            <img src="/images/ale.jpg" class="clickable-image" alt="Эль">
+                        </figure>
+                    </div>
+                </div>
+            </section>
+
+            <section id="stout">
+                <div class="tab-item reverse">
+                    <div class="tab-text">
+                        <h2>История портеров и стаутов</h2>
+                        
+                        <h3>Зарождение портера</h3>
+                        <p>Портер появился в начале XVIII века в Англии как напиток рабочих доков Лондона. Его название происходит от
+                            английского слова «porter» (носильщик), так как он был популярен среди этой профессии. Портер варился из тёмного
+                            солода, что придавало ему насыщенный цвет и карамельный вкус. Это был первый сорт пива, который стали массово
+                            производить в промышленных масштабах.</p>
+                        
+                        <h3>Эволюция стаута</h3>
+                        <p>Изначально термин «стаут» (от англ. «stout» — крепкий) использовался для обозначения более крепких версий портера. Со
+                            временем стаут выделился в отдельный стиль благодаря использованию жжёного ячменя, который придавал напитку кофейные
+                            и шоколадные ноты. В XIX веке ирландская пивоварня Guinness сделала стаут всемирно известным, представив свой
+                            культовый сухой стаут.</p>
+                        
+                        <h3>Индустриализация и глобализация</h3>
+                        <p>С развитием железных дорог и технологий пивоварения портеры и стауты распространились по Европе и США. В XX веке их
+                            популярность временно снизилась из-за роста спроса на светлые лагеры, но крафтовое движение конца 1990-х вернуло
+                            интерес к этим стилям.</p>
+                        
+                        <h2>Разновидности портеров</h2>
+                        
+                        <h3>Английский портер</h3>
+                        <ul>
+                            <li>Цвет: Тёмно-коричневый, почти чёрный.</li>
+                            <li>Вкус: Карамель, лёгкая дымчатость, ореховые оттенки.</li>
+                            <li>Примеры: Fuller's London Porter, Samuel Smith Taddy Porter.</li>
+                        </ul>
+                        
+                        <h3>Балтийский портер</h3>
+                        <ul>
+                            <li>Особенности: Более крепкий и плотный, с нотами сухофруктов. Исторически варился в странах Балтии под влиянием
+                                русских имперских стаутов.</li>
+                            <li>Примеры: Zywiec Porter, Baltika #6.</li>
+                        </ul>
+                        
+                        <h3>Американский портер</h3>
+                        <ul>
+                            <li>Характеристики: Яркая хмелевая горчинка, часто с добавлением кофе или ванили.</li>
+                            <li>Примеры: Anchor Porter, Great Lakes Edmund Fitzgerald.</li>
+                        </ul>
+                        
+                        <h2>Разновидности стаутов</h2>
+                        
+                        <h3>Сухой стаут (Dry Stout)</h3>
+                        <ul>
+                            <li>Особенности: Минимальная сладость, кофейная горчинка, лёгкая текстура.</li>
+                            <li>Примеры: Guinness Draught, Murphy's Irish Stout.</li>
+                        </ul>
+                        
+                        <h3>Молочный стаут (Milk Stout)</h3>
+                        <ul>
+                            <li>Особенности: Добавление лактозы придаёт сладость и кремовую текстуру.</li>
+                            <li>Примеры: Left Hand Milk Stout, Mackeson's XXX.</li>
+                        </ul>
+                        
+                        <h3>Овсяный стаут (Oatmeal Stout)</h3>
+                        <ul>
+                            <li>Характеристики: Овсяные хлопья смягчают вкус, добавляя шелковистость.</li>
+                            <li>Примеры: Samuel Smith Oatmeal Stout, Anderson Valley Barney Flats.</li>
+                        </ul>
+                        
+                        <h3>Имперский стаут (Imperial Stout)</h3>
+                        <ul>
+                            <li>Особенности: Высокое содержание алкоголя (8–12%), насыщенный вкус с нотами чернослива, шоколада и специй.</li>
+                            <li>Примеры: North Coast Old Rasputin, Brooklyn Black Chocolate Stout.</li>
+                        </ul>
+                        
+                        <h2>Портер vs. Стаут: В чём разница?</h2>
+                        <ul>
+                            <li>Ингредиенты: Стауты чаще включают жжёный ячмень, портеры — тёмный солод.</li>
+                            <li>Крепость: Стауты обычно крепче и плотнее, особенно имперские вариации.</li>
+                            <li>История: Портер — прародитель стаута, но со временем стили развились независимо.</li>
+                        </ul>
+                        
+                        <h2>Современные тренды</h2>
+                        <p>Крафтовые пивоварни экспериментируют с портерами и стаутами, добавляя нестандартные ингредиенты:</p>
+                        <ul>
+                            <li>Десертные стауты с ванилью, кокосом или мороженым.</li>
+                            <li>Портеры с выдержкой в бочках из-под бурбона или виски.</li>
+                            <li>Коллаборации с кофейнями для создания кофейных стаутов.</li>
+                        </ul>
+                        
+                        <h2>Заключение</h2>
+                        <p>Портеры и стауты — это наследие вековой пивоваренной традиции, переосмысленное современными мастерами. От лондонских
+                            доков до ирландских пабов, они прошли путь от «рабочего» пива до изысканного напитка для гурманов. Сегодня эти стили
+                            продолжают удивлять разнообразием, доказывая, что тёмное пиво может быть таким же сложным и многогранным, как вино
+                            или виски.</p>
+                    </div>
+                    <div class="tab-image">
+                        <figure>
+                            <img src="/images/stout_porter.jpg" class="clickable-image" alt="Стаут и Портер">
+                        </figure>
+                    </div>
+                </div>
+            </section>
+
+            <section id="about">
+                <div class="tab-item">
+                    <div class="tab-text">
+                        <p>Я люблю пиво</p>
+                        <h2>Контакты:</h2>
+                        <p>telegram: @mjpgk</p>
+                        <p>email: xazgaz50@gmail.com</p>
+                    </div>
+                    <div class="tab-image">
+                        <figure>
+                            <img src="/images/author.jpg" class="clickable-image" alt="IPA">
+                        </figure>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            const closeBtn = document.querySelector('.close');
+
+            document.querySelectorAll('.clickable-image').forEach(img => {
+                img.onclick = function() {
+                    modal.style.display = "block";
+                    modalImg.src = this.src;
+                }
+            });
+
+            closeBtn.onclick = function() { 
+                modal.style.display = "none";
+            }
+
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
+        });
+
+        function setCookie(name, value, days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
+        }
+
+        function getCookie(name) {
+            const cookies = document.cookie.split(';');
+            for(let cookie of cookies) {
+                const [cookieName, cookieValue] = cookie.trim().split('=');
+                if(cookieName === name) return cookieValue;
+            }
+            return "";
+        }
+
+        window.onload = function() {
+            const lastVisitElement = document.getElementById('lastVisit');
+            const lastVisit = getCookie('lastVisit');
+            const now = new Date().toLocaleString();
+
+            if(lastVisit) {
+                lastVisitElement.textContent = `Последний визит: ${lastVisit}`;
+            } else {
+                lastVisitElement.textContent = "Это ваш первый визит!";
+            }
+
+            setCookie('lastVisit', now, 7);
+        }
+
+        // Функция для генерации уникального ID пользователя
+        function generateUserId() {
+            let userId = localStorage.getItem('userId');
+            if (!userId) {
+                userId = 'user_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('userId', userId);
+            }
+            return userId;
+        }
+
+        // Функция для добавления пива
+        async function addBeer() {
+            const amount = document.getElementById('beer-amount').value;
+            const username = localStorage.getItem('username') || '';
+            if (!username) {
+                alert('Пожалуйста, введите и сохраните имя!');
+                return;
+            }
+            if (!amount || amount <= 0) {
+                alert('Пожалуйста, введите корректное количество');
+                return;
+            }
+            const userId = generateUserId();
+            console.log('Adding beer:', { userId, username, amount });
+            try {
+                const response = await fetch('/api/track-beer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        username: username,
+                        amount: parseFloat(amount)
+                    })
+                });
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data:', data);
+                if (response.ok) {
+                    document.getElementById('beer-amount').value = '';
+                    updateBeerStats();
+                    updateRatings();
+                } else {
+                    alert('Ошибка при сохранении данных: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Ошибка при сохранении данных');
+            }
+        }
+
+        // Функция для обновления статистики
+        async function updateBeerStats() {
+            const userId = generateUserId();
+            console.log('Updating stats for user:', userId);
+
+            try {
+                const response = await fetch(`/api/get-today-consumption?user_id=${userId}`);
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data:', data);
+
+                document.getElementById('today-total').textContent = data.total_amount.toFixed(1);
+                
+                const historyList = document.getElementById('beer-history');
+                historyList.innerHTML = '';
+                data.entries.forEach(entry => {
+                    const li = document.createElement('li');
+                    li.textContent = `${entry.amount.toFixed(1)} л. (${new Date(entry.time).toLocaleTimeString()})`;
+                    historyList.appendChild(li);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Обновляем статистику при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, updating stats...');
+            showUsername();
+            updateBeerStats();
+            updateRatings();
+        });
+
+        function saveUsername() {
+            const username = document.getElementById('username').value.trim();
+            if (username.length === 0) {
+                alert('Введите имя!');
+                return;
+            }
+            localStorage.setItem('username', username);
+            showUsername();
+        }
+
+        function showUsername() {
+            const username = localStorage.getItem('username') || '';
+            document.getElementById('username-display').textContent = username ? `Ваше имя: ${username}` : '';
+            document.getElementById('username').value = username;
+        }
+
+        async function updateRatings() {
+            // Дневной рейтинг
+            try {
+                const respToday = await fetch('/api/rating-today');
+                const dataToday = await respToday.json();
+                const listToday = document.getElementById('rating-today');
+                listToday.innerHTML = '';
+                dataToday.rating.forEach((item, idx) => {
+                    const li = document.createElement('li');
+                    li.textContent = `${item.username} — ${item.total.toFixed(2)} л.`;
+                    listToday.appendChild(li);
+                });
+            } catch (e) {
+                document.getElementById('rating-today').innerHTML = '<li>Ошибка загрузки</li>';
+            }
+            // Суммарный рейтинг
+            try {
+                const respTotal = await fetch('/api/rating-total');
+                const dataTotal = await respTotal.json();
+                const listTotal = document.getElementById('rating-total');
+                listTotal.innerHTML = '';
+                dataTotal.rating.forEach((item, idx) => {
+                    const li = document.createElement('li');
+                    li.textContent = `${item.username} — ${item.total.toFixed(2)} л.`;
+                    listTotal.appendChild(li);
+                });
+            } catch (e) {
+                document.getElementById('rating-total').innerHTML = '<li>Ошибка загрузки</li>';
+            }
+        }
+    </script>
+</body>
+
+</html>
