@@ -120,4 +120,4 @@ def rating_total():
     return jsonify({'rating': rating})
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    app.run(host='::', port=5000) 
